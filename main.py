@@ -2,13 +2,14 @@ import streamlit as st
 import pandas as pd
 
 class Usuario:
-    def __init__(self, email, senha):
+    def __init__(self, username, email, senha):
+        self.username = username
         self.email = email
         self.senha = senha
 
-    def autenticar(self, email, senha):
+    def autenticar(self, username, senha):
         # Verifica se as credenciais de login são válidas
-        return self.email == email and self.senha == senha
+        return self.username == username and self.senha == senha
 
 class Candidato:
     def __init__(self, nome, idade, cargo, experiencia, habilidades):
@@ -18,7 +19,33 @@ class Candidato:
         self.experiencia = experiencia
         self.habilidades = habilidades
 
+    def adicionar(self):
+        # Adiciona um novo candidato ao banco de dados
+        df = BancoDeDados.carregar_dados()
+        df = df.append(self.to_dict(), ignore_index=True)
+        BancoDeDados.salvar_dados(df)
+
+    def editar(self, nome_filtro):
+        # Edita as informações de um candidato existente
+        df = BancoDeDados.carregar_dados()
+        if nome_filtro in df["Nome"].values:
+            df.loc[df["Nome"] == nome_filtro, "Nome"] = self.nome
+            df.loc[df["Nome"] == nome_filtro, "Idade"] = self.idade
+            df.loc[df["Nome"] == nome_filtro, "Cargo"] = self.cargo
+            df.loc[df["Nome"] == nome_filtro, "Experiência"] = self.experiencia
+            df.loc[df["Nome"] == nome_filtro, "Habilidades"] = self.habilidades
+            BancoDeDados.salvar_dados(df)
+            return True
+        return False
+
+    def excluir(self, nome_filtro):
+        # Exclui um candidato do banco de dados
+        df = BancoDeDados.carregar_dados()
+        df = df[df["Nome"] != nome_filtro]
+        BancoDeDados.salvar_dados(df)
+
     def to_dict(self):
+        # Converte o candidato para um dicionário
         return {
             "Nome": self.nome,
             "Idade": self.idade,
@@ -48,47 +75,30 @@ class GestorCandidatos:
 
     def cadastrar_candidato(self, nome, idade, cargo, experiencia, habilidades):
         # Cria um novo candidato e salva no banco de dados
-        novo_candidato = Candidato(nome, idade, cargo, experiencia, habilidades)
-        df = BancoDeDados.carregar_dados()
-        df = df.append(novo_candidato.to_dict(), ignore_index=True)
-        BancoDeDados.salvar_dados(df)
+        candidato = Candidato(nome, idade, cargo, experiencia, habilidades)
+        candidato.adicionar()
 
     def editar_candidato(self, nome_filtro, novo_nome, nova_idade, novo_cargo, nova_experiencia, novas_habilidades):
-        # Carrega os dados existentes
-        df = BancoDeDados.carregar_dados()
-        candidatos_filtrados = df[df["Nome"].str.contains(nome_filtro, case=False, na=False)]
-        
-        if not candidatos_filtrados.empty:
-            # Atualiza as informações do candidato
-            df.loc[df["Nome"] == nome_filtro, "Nome"] = novo_nome
-            df.loc[df["Nome"] == nome_filtro, "Idade"] = nova_idade
-            df.loc[df["Nome"] == nome_filtro, "Cargo"] = novo_cargo
-            df.loc[df["Nome"] == nome_filtro, "Experiência"] = nova_experiencia
-            df.loc[df["Nome"] == nome_filtro, "Habilidades"] = novas_habilidades
-
-            # Salva as mudanças no banco de dados
-            BancoDeDados.salvar_dados(df)
-            return True
-        return False
+        # Cria o objeto Candidato com os novos dados
+        candidato = Candidato(novo_nome, nova_idade, novo_cargo, nova_experiencia, novas_habilidades)
+        return candidato.editar(nome_filtro)
 
     def excluir_candidato(self, nome_filtro):
-        # Carrega os dados existentes
-        df = BancoDeDados.carregar_dados()
-        df = df[df["Nome"] != nome_filtro]  # Remove o candidato pelo nome
-        BancoDeDados.salvar_dados(df)
+        # Exclui o candidato do banco de dados
+        candidato = Candidato(nome_filtro, None, None, None, None)
+        candidato.excluir(nome_filtro)
 
     def visualizar_candidatos(self):
         # Carrega e retorna os dados dos candidatos
-        df = BancoDeDados.carregar_dados()
-        return df
+        return BancoDeDados.carregar_dados()
 
 def login():
     st.title("Login - Gestor de Candidatos RH")
-    email = st.text_input("Usuário")
+    username = st.text_input("Usuário")
     senha = st.text_input("Senha", type="password")
     if st.button("Entrar"):
-        usuario = Usuario(email="admin", senha="admin123")  # Usuário fixo
-        if usuario.autenticar(email, senha):
+        usuario = Usuario(username="admin", email="admin@example.com", senha="admin123")  # Usuário fixo
+        if usuario.autenticar(username, senha):
             # Inicializando o atributo 'usuario' no session_state
             st.session_state.logged_in = True
             st.session_state.usuario = usuario
@@ -113,12 +123,12 @@ def app():
     else:
         # Verifica se o usuário está logado antes de acessar o atributo 'usuario'
         if 'usuario' not in st.session_state:
-            st.session_state.usuario = Usuario(email="admin", senha="admin123")
+            st.session_state.usuario = Usuario(username="admin", email="admin@example.com", senha="admin123")
 
         usuario = st.session_state.usuario
         gestor = GestorCandidatos(usuario)
 
-        st.sidebar.title(f"Bem-vindo, {usuario.email}!")
+        st.sidebar.title(f"Bem-vindo, {usuario.username}!")
         option = st.sidebar.selectbox("Escolha uma opção", [
             "Página Inicial", "Cadastrar Candidato", "Editar Candidato", "Excluir Candidato", 
             "Visualizar Candidatos"
@@ -182,4 +192,3 @@ def app():
 
 if __name__ == "__main__":
     app()
-
