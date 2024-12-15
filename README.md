@@ -1,19 +1,19 @@
-## Plataforma de Recrutamento com Streamlit
+# Plataforma de Recrutamento com Streamlit
 Este é um sistema de recrutamento desenvolvido com o Streamlit, permitindo a interação entre Administradores, Candidatos e Recrutadores. O sistema permite que Administradores gerenciem usuários e vagas, enquanto Recrutadores podem postar vagas e visualizar candidatos, e Candidatos podem se cadastrar e visualizar vagas disponíveis.
 
-# Funcionalidades
-Administrador
+## Funcionalidades
+### Administrador
 Login: Acessa a plataforma com um email e senha de administrador.
 Gerenciar Candidatos: Adiciona, edita ou exclui candidatos.
 Gerenciar Recrutadores: Adiciona, edita ou exclui recrutadores.
 Gerenciar Vagas: Adiciona, edita ou exclui vagas de emprego.
 Criar Novo Candidato: Registra novos candidatos no sistema.
 Criar Novo Recrutador: Registra novos recrutadores no sistema.
-Recrutador
+### Recrutador
 Login: Acessa a plataforma com um email e senha de recrutador.
 Postar Vaga: Adiciona novas vagas de emprego.
 Visualizar Candidatos: Visualiza os candidatos cadastrados no sistema.
-Candidato
+### Candidato
 Login: Acessa a plataforma com um email e senha de candidato.
 Visualizar Vagas: Visualiza as vagas de emprego disponíveis.
 Requisitos
